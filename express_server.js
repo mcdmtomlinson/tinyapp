@@ -58,7 +58,6 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 app.post("/urls", (req, res) => {
-  console.log(req.body);
   rlDatabase[generateRandomString()] = req.body.longURL;
   res.send('Ok');
   const shortURL = generateRandomString();
