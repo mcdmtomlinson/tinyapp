@@ -15,7 +15,7 @@ const generateRandomString = function() {
   return randomString;
 };
 
-//Keeps track of all LONG INPUT URLS and their created short URLS
+//Object with all long URLs and their corresponding short URLs
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
@@ -59,7 +59,8 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//Responds to '/u/:shortURL' GET request with the corresponding long URL, from the urlDatabase
+
+//Responds to '/u/:shortURL' GET request by redirecting to the corresponding long URL, from the urlDatabase
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   if (longURL === undefined) {
@@ -76,19 +77,21 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
-
+//Reponds to '/urls/:id' POST request by saving the newURL from the request input in the database, and redirecting to '/urls'
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   urlDatabase[shortURL] = req.body.newURL;
   res.redirect('/urls');
 });
 
+//Responds to '/login' POST request by creating a cookie with the request input username, and redirecting to '/urls'
 app.post("/login", (req, res) => {
   const username = req.body.username;
   res.cookie('username', username);
   res.redirect('/urls');
 });
 
+//Responds to '/logout' POST request by removing the cookie of the logged in user, and redirecting to '/urls'
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
