@@ -184,7 +184,9 @@ app.post("/login", (req, res) => {
   } else {
     res.sendStatus(403);
   }
+}
 });
+
 
 
  //logs out user
@@ -223,6 +225,5 @@ app.post("/register", (req, res) => {
   }
   res.cookie("user_id", userID);
   res.redirect('/urls');
-  }
- );
+ });
 
