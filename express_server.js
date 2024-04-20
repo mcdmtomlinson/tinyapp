@@ -3,10 +3,12 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcrypt');
 const  { getUserByEmail } = require('./helpers');
+app.use(express.urlencoded({extended:false}));
 const app = express();
 const PORT = 8080;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieSession({name: "user_id", secret: "qwerty"}));
+app.use(express.json());
 
 app.set("view engine", "ejs");
 
