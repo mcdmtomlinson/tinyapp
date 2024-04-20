@@ -6,32 +6,33 @@
 
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <title>TinyApp</title>
+  <title style="font-weight: 800;">TinyApp</title>
 </head>
 <body>
   <%- include('./partials/_header', {user}) %>
   <main style="margin: 1em;">
-    <h3>My URLs</h3>
-    <table class="table" style="width:auto">
+    <h3 style="font-weight: 800;">My URLs</h3>
+    <table class="table">
       <thead>
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
           <th> Edit </th>
           <th> Delete </th> 
+        </tr>
       </thead>
       <tbody>
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
             <td><%= urls[url].longURL %></td>
+            <td> <a href="/urls/<%= url %>">
+              <button type="submit" style="border-color:blue; background-color: transparent; color: blue; font-weight: 800;" >Edit</button>
+            </a>
+           </td>
             <td>
-              <td> <a href="/urls/<%= url %>">
-                <button type="submit" style="border-color:blue; background-color: white; color:blue;" >Edit</button>
-              </a>
-              </td>
               <form method="POST" action="/urls/<%= url %>/delete">
-                <button type="submit" style="border-color:red; background-color: white; color: red;" >Delete</button>
+                <button type="submit" style="border-color:red; background-color:transparent; color: red; font-weight: 800;" >Delete</button>
               </form>
             </td>
           </tr>

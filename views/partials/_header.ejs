@@ -6,19 +6,22 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        
+        <a class="nav-item nav-link" href="/urls" style="font-weight: 800;">My URLs</a>
+        <a class="nav-item nav-link" href="/urls/new" style="font-weight: 800;">Create New URL</a>
       </div>
     </div>
     <% if(user) { %>
-      <p style="color:black;padding:10px; margin:10">Logged in as: <%= user.email %></p>
-          <form action="/logout %>" method="POST">
-            <button type="submit" class="btn btn-primary">Logout</button>
-          </form>
-          <% } else { %>
-            <a href="/login">Login</a>
-            <a href="/register">Register</a>
-            <% } %>
+      <p style="color:black; padding:10px; margin:10px; font-weight: 800;">Logged in as: <%= user.email %></p>
+      <form class="form-inline" action="/logout %>" method="POST">
+        <button type="submit" class="btn btn-primary">Logout</button>
+      </form>
+   <% } else { %>
+    <a href="/login">
+      <button type="submit" style="border-color: black; background-color: transparent; color:black; font-weight: 800; padding: 10px; margin: 10px" >LOGIN</button>
+    </a>
+    <a href="/register">
+    <button type="submit" style="border-color: black; background-color: transparent; color:black; font-weight: 800; padding: 10px" >REGISTER</button>
+  </a>
+    <% } %>
   </nav>
 </header>
