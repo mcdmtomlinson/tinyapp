@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcrypt');
+const  { getUserByEmail } = require('./helpers');
 const app = express();
 const PORT = 8080;
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -31,14 +32,6 @@ const users = {
 //random 6 string generator
     const generateRandomString = () => Math.random().toString(36).substring(7);
 
-// email search helper function
-const getUserByEmail = (email, database) => {
-  for (let keyID in database) {
-    if (database[keyID].email === email) return database[keyID];
-  }
-  return false;
-};
-
 //  function that returns the URLs where the userID is equal to the id of the currently logged in user.
 const urlsForUser = (id) => {
   let urlArr = [];
@@ -51,7 +44,11 @@ const urlsForUser = (id) => {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.listen(PORT, () => {
@@ -62,22 +59,7 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-//rendering new login template
-app.get("/login", (req, res) => {
-  let templateVars = {
-    email: req.body.email,
-    password: req.body.password,
-    user: users[req.session.user_id]
-  };
-  res.render("login", templateVars);
-});
-
 app.get("/urls", (req, res) => {
-  // console.log("user info -->", users);
   //generate new filtered object holding all short URLS matched to the logged in user_id
   let objURL = {}
   console.log(req.cookies.user_id);
@@ -92,10 +74,14 @@ app.get("/urls", (req, res) => {
   }
   // pass new filtered object to template file for rendering unique table
   let templateVars = { urls: objURL, user: users[req.session.user_id] };
+  if (req.session.user_id) {
   res.render("urls_index", templateVars);
+} else {
+  res.sendStatus(403);
+}
 });
 
-
+// renders new url link creation page
 app.get("/urls/new", (req, res) => {
   let templateVars = { user: users[req.session.user_id] };
   if (req.session.user_id) {
@@ -104,32 +90,45 @@ app.get("/urls/new", (req, res) => {
   res.redirect("/login");
 }
 });
-
+// renders the url specific page based on shortURL with link to longURL
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL,
-    user: users[req.session.user_id]
-  };
-  res.render("urls_show", templateVars);
+  if (urlDatabase[req.params.shortURL]) {
+    if (urlDatabase[req.params.shortURL].userID === req.session.user_id) {
+    let templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      user: users[req.session.user_id]
+    };
+    res.render("urls_show", templateVars);
+    }
+    else res.sendStatus(403);
+  }
+  else res.sendStatus(404);
 });
 
 //when user clicks shortURL, browser redirects to actual webpage by accessing the longURL which stored the full address POSTED in form
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+  if (urlDatabase[req.params.shortURL]) {
+    let longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(`http://${longURL}`);
+    } else {
+      res.sendStatus(404);
+    }
 });
 
 // Update express server with new shortURL object entry
 app.post("/urls", (req, res) => {
-  const longURL = req.body.longURL;
-  const shortURL = generateRandomString();
-  
-  urlDatabase[shortURL] = {
-    longURL: longURL,
-    userID: req.session.user_id
-  };
-  res.redirect(`/urls/${shortURL}`);
+  if (req.session.user_id) {
+    const longURL = req.body.longURL;
+    const shortURL = generateRandomString();
+    urlDatabase[shortURL] = {
+      longURL: longURL,
+      userID: req.session.user_id
+    };
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.sendStatus(403);
+  }
 });
 
 //deletes url
@@ -153,6 +152,19 @@ app.post("/urls/:shortURL", (req, res) => {
     }
   });
 
+  //rendering new login template
+app.get("/login", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+  let templateVars = {
+    email: req.body.email,
+    password: req.body.password,
+    user: users[req.session.user_id]
+  };
+  res.render("login", templateVars);
+}
+});
 // read body's email and password, find the user that matches those and extract the userID. assign that userID to cookie
 
 // Login function
@@ -181,16 +193,20 @@ app.post("/login", (req, res) => {
  //logs out user
  app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
  });
  // show registration page
 app.get("/register", (req, res) => {
-  let templateVars = {
-    email: req.body.email,
-    password: req.body.password,
-    user: users[req.session.user_id]
-  };
-  res.render("register", templateVars);
+  if (req.session.user_id) {
+    res.redirect("urls");
+  } else {
+    let templateVars = {
+      email: req.body.email,
+      password: req.body.password,
+      user: users[req.session.user_id]
+    };
+    res.render("register", templateVars);
+  }
 });
 
 // registration event handler
